@@ -1,0 +1,12 @@
+Python 3.12.5
+fastapi==0.141.1
+imbalanced-learn==0.14.1
+joblib==1.4.2
+matplotlib==3.10.0
+numpy==2.0.2
+pandas==2.2.3
+plotly==6.9.0
+scikit-learn==1.5.2
+pydantic==2.13.5
+SQLAlchemy==2.0.49
+uvicorn==0.52.4

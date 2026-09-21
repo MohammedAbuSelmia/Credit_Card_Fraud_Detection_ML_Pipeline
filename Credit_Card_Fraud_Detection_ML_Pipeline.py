@@ -4,23 +4,23 @@ from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 import seaborn as sns
 ##- First, I want to send the file to the SQL database to make the work more organized and professional.
-# data=pd.read_csv(r'C:\Users\hp\Desktop\creditcard.csv') # i extract data from csv file
-# print(data.head(5))
+data=pd.read_csv(r'creditcard.csv') # i extract data from csv file
+print(data.head(5))
 server_name='DESKTOP-S0OHOAK'
 database_name='Credit-Card-Fraud-Detection-ML-Pipeline' 
 en=create_engine(f'mssql+pyodbc://{server_name}/{database_name}?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes') #creat engine to access to database
-# data.to_sql(name=database_name,chunksize=100,index=False,if_exists='replace',con=en) # in this code i sent data from csv to database in  SSMS  
-# print('Data transfer was successful') # This code mean the transfer process was successful. 
+data.to_sql(name=database_name,chunksize=100,index=False,if_exists='replace',con=en) # in this code i sent data from csv to database in  SSMS  
+print('Data transfer was successful') # This code mean the transfer process was successful. 
 qu="""
 select * from [Credit-Card-Fraud-Detection-ML-Pipeline]
 """
 data=pd.read_sql(qu,con=en) #now i want to read the data from sql file in ssms
 ##- Explore data
-#print(data.sample(10)) 
-#print(data.info())
-#print(data.isna().sum())# in this code i Check if there is nan value or not
+print(data.sample(10)) 
+print(data.info())
+print(data.isna().sum())# in this code i Check if there is nan value or not
 
-#print(data.corr()) # in this i explor who featuers linked together
+print(data.corr()) # in this i explor who featuers linked together
 ##- Here we notice something very important: the percentage of fraudulent activity was very low, and this is a very important indicator when we want to build a prediction model.
 print(((data.loc[data['Class']==1,['Class']].sum())/(data['Class'].count()))*100)
 
@@ -29,37 +29,37 @@ print(((data.loc[data['Class']==1,['Class']].sum())/(data['Class'].count()))*100
 ##- First, I noticed something very important: the time column is written in seconds. I want to convert it to hours so I can analyze it better
 
 data['Time']=round(((data['Time']/3600)%24).astype(float),4)
-#d=data.loc[data['Class']==1,'Class']
-#data['Time']=data['Time'].astype(int)# In this code i changed the data type to int to identify the hours when fraud occurs most frequently.
-#fraud_data = data[data['Class'] == 1] 
-#print(fraud_data.sample(10))
+d=data.loc[data['Class']==1,'Class']
+data['Time']=data['Time'].astype(int)# In this code i changed the data type to int to identify the hours when fraud occurs most frequently.
+fraud_data = data[data['Class'] == 1] 
+print(fraud_data.sample(10))
 #now i want to focus on case fraud
-# print(fraud_data['Time'].value_counts()) # After print this code We note something very important: the hours during which most scams occurred
-# plt.figure(figsize=(12, 6))
+print(fraud_data['Time'].value_counts()) # After print this code We note something very important: the hours during which most scams occurred
+plt.figure(figsize=(12, 6))
 
 ##- Now I want to draw the case fraud to be more clear
-# sns.histplot(fraud_data['Time'],color='r',bins=24,kde=True)
-# plt.title('Distribution of fraud based on the hour', fontsize=15)
-# plt.xlabel('Hour', fontsize=12)
-# plt.ylabel('Number of scams', fontsize=12)
-# plt.xticks(range(0, 24))
-# plt.show()
+sns.histplot(fraud_data['Time'],color='r',bins=24,kde=True)
+plt.title('Distribution of fraud based on the hour', fontsize=15)
+plt.xlabel('Hour', fontsize=12)
+plt.ylabel('Number of scams', fontsize=12)
+plt.xticks(range(0, 24))
+plt.show()
 
 ##-Now i want to see the details amount of stolen money
-#print(fraud_data['Amount'].aggregate(['mean','max','median','min','sum']))# in this code show the mean amount and max and median and  min and total amount stolen
+print(fraud_data['Amount'].aggregate(['mean','max','median','min','sum']))# in this code show the mean amount and max and median and  min and total amount stolen
 ## لاحظت انه تم سحب مبالغ بقيمة صفر وهذا شئ مهم الان اريد ان ارى كم نسبت المبالغ التي تم سحبها بقيمة صفر 
-#print(((fraud_data.loc[fraud_data['Amount']==0,'Amount'].count())/(fraud_data['Amount'].count()))*100)# in this code show the percentage of 0 amount of total
+print(((fraud_data.loc[fraud_data['Amount']==0,'Amount'].count())/(fraud_data['Amount'].count()))*100)# in this code show the percentage of 0 amount of total
 ##- Now i want to know the time when money has been withdrawn greater than the mean amount
-#above_of_mean=fraud_data.loc[fraud_data['Amount']>np.mean(fraud_data['Amount'])]# in this code i extract the transactions have value above then mean
-#print(above_of_mean['Time'].value_counts())# in this code i showed how many times did a fraud happen every hour
+above_of_mean=fraud_data.loc[fraud_data['Amount']>np.mean(fraud_data['Amount'])]# in this code i extract the transactions have value above then mean
+print(above_of_mean['Time'].value_counts())# in this code i showed how many times did a fraud happen every hour
 
 ###- Now i want to draw it
-# sns.histplot(above_of_mean['Time'],color='r',bins=24,kde=True)
-# plt.title('How many times has an fraud happenned')
-# plt.xlabel('Hour')
-# plt.ylabel('Number of fraud')
-# plt.xticks(range(0,24))
-# plt.show()
+sns.histplot(above_of_mean['Time'],color='r',bins=24,kde=True)
+plt.title('How many times has an fraud happenned')
+plt.xlabel('Hour')
+plt.ylabel('Number of fraud')
+plt.xticks(range(0,24))
+plt.show()
 
 # In the end i want to transform datatype time from int to float to algorithem make better
 data['Time']=data['Time'].astype(float)
@@ -96,12 +96,12 @@ X_train,X_test,y_tain,y_test=train_test_split(X,y,test_size=.27,random_state=33,
 
 ##- Now I want to be all value in  features  close to each other so taht  the model is more accurate
 X_train=standModel.fit_transform(X_train)
-X_test=standModel.fit_transform(X_test)
+X_test=standModel.transform(X_test)
 
 ##- Now i want to over fiting data to be more balance
 over_sample=RandomOverSampler(random_state=33)
 X_train_re,y_tain_re=over_sample.fit_resample(X_train,y_tain)
-#print(X_train.shape)# to make sure the over fiting happened
+print(X_train.shape)# to make sure the over fiting happened
 
 ##-Now i want to define the algorithms 
 logistic_model=LogisticRegression(random_state=33,solver='sag')
